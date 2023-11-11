@@ -14,7 +14,7 @@ function App() {
                     <Navbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        {localStorage.getItem("token")?<>
+                        {localStorage.getItem("isAuthenticated")==="true"?<>
                         <Route path="/about" element={<About />} />
                         </>:<Route path="/about" element={<Login />} />}
                         <Route path="/login" element={<Login />} />

@@ -11,7 +11,7 @@ const Notes = () => {
     const { notes, getNotes, getUser } = context;
     let [user, setUser] = useState({})
     useEffect(() => {
-        if (localStorage.getItem("token")) {
+        if (localStorage.getItem("isAuthenticated") === "true") {
             getNotes();
             getUser()
             .then((data) => {
@@ -22,7 +22,7 @@ const Notes = () => {
             nav("/login");
         }
     }, [])
-    if (localStorage.getItem("token")){
+    if (localStorage.getItem("isAuthenticated") === "true"){
         document.title = user.name + "'s Notes"
     }
 

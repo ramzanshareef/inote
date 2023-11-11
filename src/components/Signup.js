@@ -22,6 +22,7 @@ const Signup = () => {
         e.preventDefault();
         const response = await fetch(backendURL + "/api/auth/signup", {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             },
@@ -29,7 +30,7 @@ const Signup = () => {
         });
         const jsonData = await response.json();
         if (response.status === 200) {
-            localStorage.setItem("token", jsonData.token);
+            localStorage.setItem("isAuthenticated", "true");
             nav("/");
             window.location.reload();
         }
@@ -46,7 +47,7 @@ const Signup = () => {
     }
     return (
         <>
-            {!localStorage.getItem("token") ? <>
+            {(localStorage.getItem("isAuthenticated")==="false" || !localStorage.getItem("isAuthenticated"))? <>
                 <form className="w-2/5 mx-auto my-5 text-lg flex flex-col items-center space-y-3" onSubmit={handleSignup}>
                     <p>Name</p>
                     <input className="border border-black px-2 py-1" type="text" name="name" value={credentials.name} onChange={handleOnChange} />
@@ -57,7 +58,9 @@ const Signup = () => {
                     <button to="/login" className="rounded-md mx-2 px-2 py-1 w-fit cursor-pointer bg-blue-600 text-white hover:bg-blue-500">Signup</button>
                 </form>
             </> : <>
-                <div className="flex items-center justify-center my-5">Thanks for Signing Up {user.name}!</div>
+                <div className="flex items-center justify-center my-5">Thanks for Signing Up 
+                {user.name}
+                !</div>
             </>}
         </>
     )

@@ -1,11 +1,9 @@
-const express = require("express")
+const express = require("express");
 const router = express.Router();
 const fetchUser = require("../middlewares/fetchUser");
 const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const JWT_Secret = process.env.JWT_SECRET || "thisismysecretkey";
 
 router.post("/signup", [
     body("name", "Enter Valid Name").isLength({ min: 3 }),
@@ -28,18 +26,16 @@ router.post("/signup", [
                 email: req.body.email,
                 password: secPass
             });
-            const data = {
-                username: {
-                    id: user.id
-                }
-            };
-            let token = jwt.sign(data, JWT_Secret);
-            return res.status(200).json({ token });
+            req.session.userID = user.id;
+            req.session.isAuthenticated = true;
+            req.session.save(() => {
+                return res.status(200).json({ message: "Singup Success!" });
+            })
         }
         catch (err) {
             return res.status(500).json({ message: err.message });
         }
-    })
+    });
 
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -52,28 +48,43 @@ router.post("/login", async (req, res) => {
         if (!comparePass) {
             return res.status(401).json({ message: "Incorrect Credentials" });
         }
-        const data = {
-            username: {
-                id: user.id
-            }
-        };
-        const token = jwt.sign(data, JWT_Secret);
-        return res.status(200).json({ token });
+        req.session.userID = user.id;
+        req.session.isAuthenticated = true;
+        req.session.save(() => {
+            return res.status(200).json({ message: "Login Success!" });
+        })
     }
     catch (err) {
         return res.status(500).json({ message: err.message });
     }
-})
+});
 
 router.post("/user", fetchUser, async (req, res) => {
     try {
-        let id = req.user.id;
+        let id = req.session.userID;
         const user = await User.findById(id).select("-password -__v -_id");
         return res.status(200).json({ user });
     }
     catch (err) {
         return res.status(520).json({ message: err.message });
     }
-})
+});
+
+router.post("/logout", fetchUser, async (req, res) => {
+    try{
+        if(req.session.isAuthenticated===true){
+            req.session.isAuthenticated = false;
+            req.session.destroy(()=>{
+                return res.status(200).json({message: "Logout Success!"});
+            });
+        }
+        else{
+            return res.status(401).json({message: "Not Logged In!"});
+        }
+    }
+    catch(err){
+        return res.status(500).json({message: err.message});
+    }
+});
 
 module.exports = router;

@@ -6,14 +6,14 @@ const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 const NoteState = (props) => {
     const [notes, setNotes] = useState([]);
     const [user, setUser] = useState([]);
-    let token = localStorage.getItem("token");
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
     const getNotes = async () => {
-        if (token) {
+        if (isAuthenticated === "true") {
             const response = await fetch(backendURL + "/api/notes/fetchallnotes", {
                 method: "GET",
+                credentials: "include",
                 headers: {
-                    "Content-Type": "application/json",
-                    "token": token,
+                    "Content-Type": "application/json"
                 }
             });
             const jsonData = await response.json();
@@ -23,14 +23,14 @@ const NoteState = (props) => {
             else {
                 console.log(jsonData.message);
             }
-        } 
+        }
     }
     const addNote = async (title, description, tag) => {
         const response = await fetch(backendURL + "/api/notes/addnote", {
             method: "POST",
+            credentials: "include",
             headers: {
-                "Content-Type": "application/json",
-                "token": token
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ title, description, tag })
         });
@@ -50,16 +50,16 @@ const NoteState = (props) => {
     const deleteNote = async (id) => {
         const response = await fetch(`${backendURL}/api/notes/deletenote/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
-                "Content-Type": "application/json",
-                "token": token
+                "Content-Type": "application/json"
             }
         });
         const jsonData = await response.json();
         if (response.status === 200) {
             setNotes(jsonData.notes);
         }
-        else{
+        else {
             console.log(jsonData.message);
         }
     }
@@ -83,19 +83,16 @@ const NoteState = (props) => {
         console.log("Edited a note, with id = " + id);
     }
     const getUser = async () => {
-        if (token){
+        if (isAuthenticated === "true") {
             const response = await fetch(backendURL + "/api/auth/user", {
                 method: "POST",
+                credentials: "include",
                 headers: {
-                    "Content-Type": "application/json",
-                    "token": token
+                    "Content-Type": "application/json"
                 }
             });
             const jsonData = await response.json();
             return jsonData.user;
-        }
-        else {
-            return null;
         }
     }
 
